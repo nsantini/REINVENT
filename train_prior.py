@@ -12,22 +12,25 @@ from model import RNN
 from utils import Variable, decrease_learning_rate
 rdBase.DisableLog('rdApp.error')
 
-def pretrain(restore_from=None):
+def train_prior(restore_prior_from=None):
     """Trains the Prior RNN"""
 
     # Read vocabulary from a file
     voc = Vocabulary(init_from_file="data/Voc")
 
     # Create a Dataset from a SMILES file
-    moldata = MolData("data/mols_filtered.smi", voc)
+    moldata = MolData("data/prior_filtered.smi", voc)
     data = DataLoader(moldata, batch_size=128, shuffle=True, drop_last=True,
                       collate_fn=MolData.collate_fn)
 
     Prior = RNN(voc)
 
     # Can restore from a saved RNN
-    if restore_from:
-        Prior.rnn.load_state_dict(torch.load(restore_from))
+    if restore_prior_from:
+        if torch.cuda.is_available():
+            Prior.rnn.load_state_dict(torch.load(restore_prior_from))
+        else:
+            Prior.rnn.load_state_dict(torch.load(restore_prior_from, map_location=lambda storage, loc: storage))
 
     optimizer = torch.optim.Adam(Prior.rnn.parameters(), lr = 0.001)
     for epoch in range(1, 6):
@@ -70,4 +73,4 @@ def pretrain(restore_from=None):
         torch.save(Prior.rnn.state_dict(), "data/Prior.ckpt")
 
 if __name__ == "__main__":
-    pretrain()
+    train_prior()

@@ -304,8 +304,14 @@ def construct_vocabulary(smiles_list):
                 [add_chars.add(unit) for unit in chars]
 
     print("Number of characters: {}".format(len(add_chars)))
+    print("Characters: {}".format(add_chars))
+    with open('data/Voc', 'r') as f:
+        chars = f.read().split()
+    for char in add_chars:
+        if char not in chars:
+            chars.append(char)
     with open('data/Voc', 'w') as f:
-        for char in add_chars:
+        for char in chars:
             f.write(char + "\n")
     return add_chars
 
@@ -315,4 +321,4 @@ if __name__ == "__main__":
     smiles_list = canonicalize_smiles_from_file(smiles_file)
     print("Constructing vocabulary...")
     voc_chars = construct_vocabulary(smiles_list)
-    write_smiles_to_file(smiles_list, "data/mols_filtered.smi")
+    write_smiles_to_file(smiles_list, sys.argv[2])
